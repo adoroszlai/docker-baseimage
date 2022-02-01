@@ -1,22 +1,23 @@
-FROM centos:8.1.1911
+FROM debian:11.2-slim
 ARG LAUNCHER_HASH=master
 VOLUME /data
 RUN groupadd flokkr
-RUN yum install epel-release -y && \
-   yum -y update && \
-   yum install -y jq git \
-   java-1.8.0-openjdk-devel \
-   java-latest-openjdk-devel \
-   python3-pip \
-   unzip \
-   wget sudo nc which && \
-   alternatives --set python /usr/bin/python3 && \
-   yum clean all && \
-   rm /etc/krb5.conf
+RUN apt update -q \
+  && apt install -y \
+     git \
+     jq \
+     netcat \
+     openjdk-11-jdk \
+     python3-pip \
+     sudo \
+     unzip \
+     wget \
+   && update-alternatives --install /usr/bin/python python /usr/bin/python3 1 \
+   && rm -rf /var/lib/apt/lists/*
 RUN pip3 install robotframework robotframework-requests
 RUN wget -O /usr/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 && chmod +x /usr/bin/dumb-init
 RUN echo "%flokkr ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/flokkr
-ENV CONF_DIR=/opt JAVA_HOME=/usr/lib/jvm/java-openjdk/
+ENV CONF_DIR=/opt JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
 WORKDIR /opt
 ENV PERMISSION_FIX=true
